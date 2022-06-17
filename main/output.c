@@ -117,12 +117,9 @@ void output_task(void * pvParameters){
 	while (1) {
 
 		ESP_LOGI("[output_task]", "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
-
 		blink_led();
-
 		/* Toggle the LED state */
         s_led_state = !s_led_state;
-
         vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 
