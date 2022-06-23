@@ -67,6 +67,14 @@
  */
 extern void input_init(void);
 
+/**
+ * @details
+ *
+ * @param[in]
+ *
+ * @return
+ */
+extern uint8_t get_multiplier(void);
 //=============================================================================
 
 #endif /* _INPUT_H_ */

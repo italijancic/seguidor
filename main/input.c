@@ -212,6 +212,20 @@ extern void input_init(void)
 /* End */
 
 /**
+ * @details
+ *
+ * @param[in]
+ *
+ * @return
+ */
+extern uint8_t get_multiplier(void){
+	return multiplier;
+}
+//---------------------------------------------------------------------------//
+/* End */
+
+
+/**
  * @brief
  *
  * @param  None

@@ -116,6 +116,7 @@ void output_task(void *pvParameters)
 {
 
 	// Local data
+	uint8_t multiplier = 0;
 
 	// Infinity loop of task
 	while (1)
@@ -124,6 +125,8 @@ void output_task(void *pvParameters)
 		blink_led();
 		/* Toggle the LED state */
 		s_led_state = !s_led_state;
+		// Read multiplier
+		multiplier = get_multiplier();
 		ESP_LOGI("[output_task]", "delay %u ms!", multiplier * 500);
 		vTaskDelay(multiplier * 500 / portTICK_RATE_MS);
 	}
