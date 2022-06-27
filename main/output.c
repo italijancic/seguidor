@@ -12,15 +12,15 @@
 // [Inclusions] ===============================================================
 
 #include "output.h"
-
 #include "input.h"
 
 //=============================================================================
 
 //=============================================================================
 // [Private Defines] ==========================================================
-#define BLINK_GPIO_1 GPIO_NUM_2
-#define BLINK_GPIO_2 GPIO_NUM_5
+#define PROCESS_LED GPIO_NUM_2
+#define STATUS_RED_LED GPIO_NUM_18
+#define STATUS_GREEN_LED GPIO_NUM_19
 
 //=============================================================================
 
@@ -59,7 +59,10 @@
 //----------------------------------------------------
 
 // Vars ----------------------------------------------
-static uint8_t s_led_state = 0;
+static uint8_t PROCESS_LED_state = 0;
+static uint8_t STATUS_RED_LED_state = 0;
+static uint8_t STATUS_GREEN_LED_state = 0;
+
 //----------------------------------------------------
 
 // Task Handlers -------------------------------------
@@ -97,7 +100,7 @@ static void blink_led(void);
  * @return None
  *
  */
-static void configure_led(void);
+static void configure_leds(void);
 
 //=============================================================================
 
@@ -121,10 +124,10 @@ void output_task(void *pvParameters)
 	// Infinity loop of task
 	while (1)
 	{
-		ESP_LOGI("[output_task]", "Turning the LED %s!", s_led_state == true ? "ON" : "OFF");
+		ESP_LOGI("[output_task]", "Turning the LED %s!", PROCESS_LED_state == true ? "ON" : "OFF");
 		blink_led();
 		/* Toggle the LED state */
-		s_led_state = !s_led_state;
+		PROCESS_LED_state = !PROCESS_LED_state;
 		// Read multiplier
 		multiplier = get_multiplier();
 		ESP_LOGI("[output_task]", "delay %u ms!", multiplier * 500);
@@ -162,8 +165,7 @@ void output_task(void *pvParameters)
 static void blink_led(void)
 {
 	/* Set the GPIO level according to the state (LOW or HIGH)*/
-	gpio_set_level(BLINK_GPIO_1, s_led_state);
-	gpio_set_level(BLINK_GPIO_2, !s_led_state);
+	gpio_set_level(PROCESS_LED, PROCESS_LED_state);
 }
 //---------------------------------------------------------------------------//
 /* End */
@@ -176,14 +178,21 @@ static void blink_led(void)
  * @return None
  *
  */
-static void configure_led(void)
+static void configure_leds(void)
 {
-	ESP_LOGI("[configure_led]", "Example configured to blink GPIO LED!");
-	gpio_reset_pin(BLINK_GPIO_1);
-	gpio_reset_pin(BLINK_GPIO_2);
-	/* Set the GPIO as a push/pull output */
-	gpio_set_direction(BLINK_GPIO_1, GPIO_MODE_OUTPUT);
-	gpio_set_direction(BLINK_GPIO_2, GPIO_MODE_OUTPUT);
+	ESP_LOGI("[configure_leds]", "Configuring status and process LEDs");
+	/* Reset pin mode to default */
+	gpio_reset_pin(PROCESS_LED);
+	gpio_reset_pin(STATUS_GREEN_LED);
+	gpio_reset_pin(STATUS_RED_LED);
+	/* Set pin mode */
+	gpio_set_direction(PROCESS_LED, GPIO_MODE_OUTPUT);
+	gpio_set_direction(STATUS_GREEN_LED, GPIO_MODE_OUTPUT);
+	gpio_set_direction(STATUS_RED_LED, GPIO_MODE_OUTPUT);
+
+	gpio_set_level(PROCESS_LED, PROCESS_LED_state);
+	gpio_set_level(STATUS_GREEN_LED, STATUS_RED_LED_state);
+	gpio_set_level(STATUS_RED_LED, STATUS_GREEN_LED_state);
 }
 //---------------------------------------------------------------------------//
 /* End */
@@ -205,7 +214,7 @@ extern void output_init(void)
 
 	ESP_LOGI("[output_init]", "Example configured to blink GPIO LED!");
 
-	configure_led();
+	configure_leds();
 
 	// Create FreeRTOS Task
 	xTaskCreate(&output_task, "[output_task]", 1024 * 2, NULL, tskIDLE_PRIORITY + 1, NULL);
