@@ -129,13 +129,28 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# Example Configuration
+# nmea parser config
 #
-CONFIG_BLINK_LED_GPIO=y
-# CONFIG_BLINK_LED_RMT is not set
-CONFIG_BLINK_GPIO=5
-CONFIG_BLINK_PERIOD=1000
-# end of Example Configuration
+CONFIG_NMEA_PARSER_UART_RXD=4
+CONFIG_NMEA_PARSER_RING_BUFFER_SIZE=2048
+CONFIG_NMEA_PARSER_TASK_STACK_SIZE=2048
+CONFIG_NMEA_PARSER_TASK_PRIORITY=2
+
+#
+# NMEA Statement Support
+#
+
+#
+# At least one statement must be selected
+#
+CONFIG_NMEA_STATEMENT_GGA=y
+CONFIG_NMEA_STATEMENT_GSA=y
+CONFIG_NMEA_STATEMENT_GSV=y
+CONFIG_NMEA_STATEMENT_RMC=y
+CONFIG_NMEA_STATEMENT_GLL=y
+CONFIG_NMEA_STATEMENT_VTG=y
+# end of NMEA Statement Support
+# end of nmea parser config
 
 #
 # Compiler options

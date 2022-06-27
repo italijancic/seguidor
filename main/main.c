@@ -19,6 +19,7 @@
 
 #include "output.h"
 #include "input.h"
+#include "gps.h"
 
 //=============================================================================
 
@@ -137,10 +138,13 @@ void app_main(void)
 {
 
 	// Init outputs
-	output_init();
+	// output_init();
 
 	// Init inputs
-	input_init();
+	// input_init();
+
+	// Init gps
+	gps_init();
 }
 
 //=============================[End app_main]==================================
