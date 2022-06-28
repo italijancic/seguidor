@@ -18,8 +18,6 @@
 //=============================================================================
 // [Private Defines] ==========================================================
 
-#define TIME_ZONE (3)   	//Argentina Time
-#define YEAR_BASE (2000) 	//date in GPS starts from 2000
 
 //=============================================================================
 
@@ -35,6 +33,7 @@
 //----------------------------------------------------
 
 // Vars ----------------------------------------------
+gps_t gps_data = {0};
 //----------------------------------------------------
 
 // Task Handlers -------------------------------------
@@ -69,6 +68,9 @@ QueueHandle_t xGPSQueue;
 //----------------------------------------------------
 
 // Event Group Handlers ------------------------------
+
+EventGroupHandle_t gps_event_group = NULL;
+
 //----------------------------------------------------
 
 // Semaphore Handlers --------------------------------
@@ -116,22 +118,15 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
 
 			// Cast data to gps_t type
             gps = (gps_t *)event_data;
+			// Load new data into global var
+			gps_data = *gps;
+			if(gps->valid)
+			{
+				xEventGroupSetBits(gps_event_group, GPS_DATA_VALID);
+			}
+
 			// Send data to apply task over freeRTOS queue
-            xQueueSend(xGPSQueue, gps, portMAX_DELAY);
-
-            /* print information parsed from GPS statements */
-            // ESP_LOGI("[gps_event_handler]", "%d/%d/%d %d:%d:%d => \r\n"
-            //         "\t\t\t\t\t\tlatitude    = %.05f °N\r\n"
-            //         "\t\t\t\t\t\tlongtitude  = %.05f °E\r\n"
-            //         "\t\t\t\t\t\taltitude    = %.02f [m]\r\n"
-            //         "\t\t\t\t\t\tspeed       = %f [m/s]\r\n"
-            //         "\t\t\t\t\t\tSat in view = %d\r\n"
-            //         "\t\t\t\t\t\tSat in use  = %d\r\n",
-            //         gps->date.year + YEAR_BASE, gps->date.month, gps->date.day,
-            //         gps->tim.hour + TIME_ZONE, gps->tim.minute, gps->tim.second,
-            //         gps->latitude, gps->longitude, gps->altitude, gps->speed,
-            //         gps->sats_in_view, gps->sats_in_use);
-
+            // xQueueSend(xGPSQueue, gps, portMAX_DELAY);
             break;
 
         case GPS_UNKNOWN:
@@ -254,6 +249,9 @@ void gps_task( void *pvParameters ){
  */
 extern void gps_init(void)
 {
+	// Local data declaration
+	const char *TAG = "[gps_init]";
+
 	/* NMEA parser configuration */
     nmea_parser_config_t config = NMEA_PARSER_CONFIG_DEFAULT();
 	// Set ESP32 (Rx Pin) <---> GPS
@@ -264,17 +262,23 @@ extern void gps_init(void)
     /* register event handler for NMEA parser library */
     nmea_parser_add_handler(nmea_hdl, gps_event_handler, NULL);
 
+	/**
+	 * FreeRTOS Event Group Creation
+	 * **/
+	gps_event_group = xEventGroupCreate();
+	if(gps_event_group ==0 )
+		ESP_LOGE(TAG, "gps_event_group was not created!");
     /**
-     * FreeRTOS Queus Creation
+     * FreeRTOS Queues Creation
      */
     xGPSQueue = xQueueCreate(10, sizeof(gps_t));
     if( xGPSQueue == 0)
-        ESP_LOGE("[app_main]","xGPSQueue was not created!");
+        ESP_LOGE(TAG,"xGPSQueue was not created!");
 
     /**
      * FreeRTOS Task Creation
      */
-    xTaskCreate(&gps_task, "[gps_task]", 4096 ,NULL, configMINIMAL_STACK_SIZE + 1, &h2GpsTask);
+    // xTaskCreate(&gps_task, "[gps_task]", 4096 ,NULL, configMINIMAL_STACK_SIZE + 1, &h2GpsTask);
 }
 //---------------------------------------------------------------------------//
 /* End */
@@ -287,7 +291,20 @@ extern void gps_init(void)
  * @return None
  *
  */
+extern gps_t gps_get_data(void)
+{
+	// return gps data
+	return gps_data;
+}
 
+/**
+ * @brief
+ *
+ * @param  None
+ *
+ * @return None
+ *
+ */
 //---------------------------------------------------------------------------//
 /* End */
 

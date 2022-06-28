@@ -21,6 +21,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "freertos/event_groups.h"
 
 #include "driver/gpio.h"
 #include "esp_log.h"
@@ -32,6 +33,12 @@
 
 //=============================================================================
 // [External Defines] =========================================================
+
+#define TIME_ZONE (3)   	//Argentina Time
+#define YEAR_BASE (2000) 	//date in GPS starts from 2000
+
+// GPS Event Group BITs
+#define GPS_DATA_VALID BIT0
 
 //=============================================================================
 
@@ -47,6 +54,9 @@
 //----------------------------------------------------
 
 // Vars ----------------------------------------------
+
+extern gps_t gps_data;
+
 //----------------------------------------------------
 
 // Task Handlers -------------------------------------
@@ -56,6 +66,9 @@
 //----------------------------------------------------
 
 // Event Group Handlers ------------------------------
+
+extern EventGroupHandle_t gps_event_group;
+
 //----------------------------------------------------
 
 // Semaphore Handlers --------------------------------
@@ -74,6 +87,15 @@
  * @return
  */
 extern void gps_init(void);
+
+/**
+ * @details
+ *
+ * @param
+ *
+ * @return
+ */
+extern gps_t gps_get_data(void);
 
 /**
  * @details
