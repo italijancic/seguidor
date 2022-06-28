@@ -13,6 +13,7 @@
 
 #include "output.h"
 #include "input.h"
+#include "semaphore.h"
 
 //=============================================================================
 
@@ -36,6 +37,7 @@
 //----------------------------------------------------
 
 // Vars ----------------------------------------------
+extern xSemaphoreHandle GlobalKey;
 //----------------------------------------------------
 
 // Task Handlers -------------------------------------
@@ -122,8 +124,13 @@ void output_task(void *pvParameters)
 	uint8_t multiplier = 0;
 
 	// Infinity loop of task
+	xSemaphoreTake(GlobalKey, portMAX_DELAY);
+
+	gpio_set_level(STATUS_GREEN_LED, !STATUS_GREEN_LED_state);
+	gpio_set_level(STATUS_RED_LED, STATUS_RED_LED_state);
 	while (1)
 	{
+
 		ESP_LOGI("[output_task]", "Turning the LED %s!", PROCESS_LED_state == true ? "ON" : "OFF");
 		blink_led();
 		/* Toggle the LED state */
@@ -192,7 +199,7 @@ static void configure_leds(void)
 
 	gpio_set_level(PROCESS_LED, PROCESS_LED_state);
 	gpio_set_level(STATUS_GREEN_LED, STATUS_RED_LED_state);
-	gpio_set_level(STATUS_RED_LED, STATUS_GREEN_LED_state);
+	gpio_set_level(STATUS_RED_LED, !STATUS_GREEN_LED_state);
 }
 //---------------------------------------------------------------------------//
 /* End */

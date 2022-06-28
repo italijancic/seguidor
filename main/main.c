@@ -14,12 +14,13 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 #include "esp_log.h"
 #include "sdkconfig.h"
 
 #include "output.h"
 #include "input.h"
-
+#include "semaphore.h"
 //=============================================================================
 
 //=============================================================================
@@ -135,6 +136,7 @@
  */
 void app_main(void)
 {
+	semaphore_init();
 
 	// Init outputs
 	output_init();
