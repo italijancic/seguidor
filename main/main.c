@@ -102,7 +102,7 @@ TaskHandle_t h2TestTask = NULL;
 void test_task(void *pvParameters)
 {
 	// Local data declaration
-	const char *TAG = "[test_task]";
+	const char *TAG = "[main_test_task]";
 	gps_t gps_data = {0};
 
 	// Local data definition
@@ -117,25 +117,30 @@ void test_task(void *pvParameters)
 	{
 		gps_data = gps_get_data();
 
-		if(gps_data.valid){
-
+		if(gps_data.valid)
+		{
 			ESP_LOGI(TAG, 	"\r\n\r\n"
+							"\tfix		= %d\r\n"
+							"\tvalid		= %s\r\n"
 							"\tutc date	= %02d/%02d/%02d\r\n"
 							"\tutc time	= %02d:%02d:%02d\r\n"
-							"\tlatitude    	= %.05f °N\r\n"
-							"\tlongtitude  	= %.05f °E\r\n"
+							"\tlatitude    	= %.05f %s\r\n"
+							"\tlongtitude  	= %.05f %s\r\n"
 							"\taltitude    	= %.02f [m]\r\n"
 							"\tspeed      	= %f [m/s]\r\n"
 							"\tSat in view 	= %d\r\n"
 							"\tSat in use  	= %d\r\n",
-						gps_data.date.day, gps_data.date.month, gps_data.date.year + YEAR_BASE,
-						//gps.tim.hour + TIME_ZONE, gps.tim.minute, gps.tim.second,
-						gps_data.tim.hour, gps_data.tim.minute, gps_data.tim.second,
-						gps_data.latitude, gps_data.longitude, gps_data.altitude, gps_data.speed,
-						gps_data.sats_in_view, gps_data.sats_in_use);
-
+							gps_data.fix,
+							(gps_data.valid ? "true":"false"),
+							gps_data.date.day, gps_data.date.month, gps_data.date.year + YEAR_BASE,
+							// gps_data.tim.hour - TIME_ZONE, gps_data.tim.minute, gps_data.tim.second,
+							gps_data.tim.hour, gps_data.tim.minute, gps_data.tim.second,
+							gps_data.latitude, (gps_data.latitude > 0 ? "°N":"°S"),
+							gps_data.longitude, (gps_data.longitude > 0 ? "°E":"°W"), gps_data.altitude, gps_data.speed,
+							gps_data.sats_in_view, gps_data.sats_in_use);
 		}
-		else {
+		else
+		{
 			ESP_LOGW(TAG, "GPS Invalid Data");
 		}
 
@@ -210,7 +215,7 @@ void app_main(void)
 	/**
      * FreeRTOS Task Creation
      */
-    xTaskCreate(&test_task, "[test_task]", 4096 ,NULL, configMINIMAL_STACK_SIZE + 1, &h2TestTask);
+    xTaskCreate(&test_task, "[main_test_task]", 4096 ,NULL, configMINIMAL_STACK_SIZE + 1, &h2TestTask);
 }
 
 //=============================[End app_main]==================================

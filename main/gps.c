@@ -120,7 +120,7 @@ static void gps_event_handler(void *event_handler_arg, esp_event_base_t event_ba
             gps = (gps_t *)event_data;
 			// Load new data into global var
 			gps_data = *gps;
-			if(gps->valid)
+			if(gps->valid && (gps->fix != GPS_FIX_INVALID))
 			{
 				xEventGroupSetBits(gps_event_group, GPS_DATA_VALID);
 			}
@@ -181,18 +181,25 @@ void gps_task( void *pvParameters ){
         while( xQueueReceive(xGPSQueue, &gps, portMAX_DELAY) != 0){
             //ESP_LOGI("[Test_Task]","Frame Update");
             /* print information parsed from GPS statements */
-            ESP_LOGI(TAG, "%d/%d/%d %d:%d:%d => \r\n"
-                    "\t\t\t\t\t\tlatitude    = %.05f °N\r\n"
-                    "\t\t\t\t\t\tlongtitude  = %.05f °E\r\n"
-                    "\t\t\t\t\t\taltitude    = %.02f [m]\r\n"
-                    "\t\t\t\t\t\tspeed       = %f [m/s]\r\n"
-                    "\t\t\t\t\t\tSat in view = %d\r\n"
-                    "\t\t\t\t\t\tSat in use  = %d\r\n",
-                     gps.date.day, gps.date.month, gps.date.year + YEAR_BASE,
-                    //gps.tim.hour + TIME_ZONE, gps.tim.minute, gps.tim.second,
-                    gps.tim.hour, gps.tim.minute, gps.tim.second,
-                    gps.latitude, gps.longitude, gps.altitude, gps.speed,
-                    gps.sats_in_view, gps.sats_in_use);
+            ESP_LOGI(TAG, 	"\r\n\r\n"
+							"\tfix		= %d\r\n"
+							"\tvalid		= %s\r\n"
+							"\tutc date	= %02d/%02d/%02d\r\n"
+							"\tutc time	= %02d:%02d:%02d\r\n"
+							"\tlatitude    	= %.05f %s\r\n"
+							"\tlongtitude  	= %.05f %s\r\n"
+							"\taltitude    	= %.02f [m]\r\n"
+							"\tspeed      	= %f [m/s]\r\n"
+							"\tSat in view 	= %d\r\n"
+							"\tSat in use  	= %d\r\n",
+							gps.fix,
+							(gps.valid ? "true":"false"),
+							gps.date.day, gps.date.month, gps.date.year + YEAR_BASE,
+							// gps.tim.hour - TIME_ZONE, gps.tim.minute, gps.tim.second,
+							gps.tim.hour, gps.tim.minute, gps.tim.second,
+							gps.latitude, (gps.latitude > 0 ? "°N":"°S"),
+							gps.longitude, (gps.longitude > 0 ? "°E":"°W"), gps.altitude, gps.speed,
+							gps.sats_in_view, gps.sats_in_use);
 
             vTaskDelay(1000 / portTICK_RATE_MS);
         }
@@ -266,14 +273,14 @@ extern void gps_init(void)
 	 * FreeRTOS Event Group Creation
 	 * **/
 	gps_event_group = xEventGroupCreate();
-	if(gps_event_group ==0 )
+	if(gps_event_group == 0 )
 		ESP_LOGE(TAG, "gps_event_group was not created!");
     /**
      * FreeRTOS Queues Creation
      */
-    xGPSQueue = xQueueCreate(10, sizeof(gps_t));
-    if( xGPSQueue == 0)
-        ESP_LOGE(TAG,"xGPSQueue was not created!");
+    // xGPSQueue = xQueueCreate(10, sizeof(gps_t));
+    // if( xGPSQueue == 0)
+    //     ESP_LOGE(TAG,"xGPSQueue was not created!");
 
     /**
      * FreeRTOS Task Creation
