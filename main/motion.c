@@ -124,7 +124,7 @@ void motion_task(void *pvParameters)
 
 	// Wait until get GPS valid data
 	ESP_LOGI(TAG, "Waiting to get GPS valid data...");
-	// xEventGroupWaitBits(gps_event_group, GPS_DATA_VALID, false, false, portMAX_DELAY);
+	xEventGroupWaitBits(gps_event_group, GPS_DATA_VALID, false, false, portMAX_DELAY);
 
 	// Infinity loop of task
 	while (1)

@@ -210,11 +210,11 @@ void app_main(void)
 	// Init inputs
 	// input_init();
 
-	// Init motion logic
-	motion_init();
-
 	// Init gps
 	gps_init();
+
+	// Init motion logic
+	motion_init();
 
 	/**
      * FreeRTOS Task Creation
