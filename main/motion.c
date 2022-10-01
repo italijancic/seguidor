@@ -1,7 +1,7 @@
 /**
- * @file main.c
+ * @file motion.c
  *
- * @author
+ * @author itlijancic@outlook.com
  *
  * @date
  *
@@ -11,18 +11,6 @@
 //=============================================================================
 // [Inclusions] ===============================================================
 
-#include <stdint.h>
-
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-
-#include "esp_log.h"
-#include "sdkconfig.h"
-
-#include "output.h"
-#include "input.h"
-#include "gps.h"
 #include "motion.h"
 
 //=============================================================================
@@ -70,7 +58,9 @@
 //----------------------------------------------------
 
 // Task Handlers -------------------------------------
-TaskHandle_t h2TestTask = NULL;
+
+TaskHandle_t h2MotionTask = NULL;
+
 //----------------------------------------------------
 
 // Queue Handlers ------------------------------------
@@ -87,23 +77,46 @@ TaskHandle_t h2TestTask = NULL;
 //=============================================================================
 // [Local Function Declarations] ==============================================
 
+/**
+ * @brief
+ *
+ * @param  None
+ *
+ * @return None
+ *
+ */
+
 //=============================================================================
+
+//====================================================================
+// [Event Handlers Definition] =======================================
+
+/**
+ * @ name:
+ * @ param:			None
+ * @ return:		None
+ * @ description:
+ * */
+
+//------------------------------------------------------------------//
+/* End  */
+
+//====================================================================
 
 //=============================================================================
 // [FreeRTOS Task Definitions] ================================================
 
 /**
- * @brief      FreeRTOS Task to test gps appy layer iplementation
- *
- * @param      void *pvParameters
- *
- * @returns    None
- *
- */
-void test_task(void *pvParameters)
+ * @ name:
+ * @ param:			None
+ * @ return:		None
+ * @ description:
+ * */
+void motion_task(void *pvParameters)
 {
-	// Local data declaration
-	const char *TAG = "[main_test_task]";
+
+	/* Local data declaration */
+	const char *TAG = "[motion_task]";
 	gps_t gps_data = {0};
 
 	// Local data definition
@@ -111,7 +124,7 @@ void test_task(void *pvParameters)
 
 	// Wait until get GPS valid data
 	ESP_LOGI(TAG, "Waiting to get GPS valid data...");
-	xEventGroupWaitBits(gps_event_group, GPS_DATA_VALID, false, false, portMAX_DELAY);
+	// xEventGroupWaitBits(gps_event_group, GPS_DATA_VALID, false, false, portMAX_DELAY);
 
 	// Infinity loop of task
 	while (1)
@@ -139,6 +152,8 @@ void test_task(void *pvParameters)
 							gps_data.latitude, (gps_data.latitude > 0 ? "°N":"°S"),
 							gps_data.longitude, (gps_data.longitude > 0 ? "°E":"°W"), gps_data.altitude, gps_data.speed,
 							gps_data.sats_in_view, gps_data.sats_in_use);
+
+			// Logica de movimiento, teniendo señal de GPS
 		}
 		else
 		{
@@ -149,10 +164,11 @@ void test_task(void *pvParameters)
 		vTaskDelay(5000/portTICK_RATE_MS);
 	}
 	// End while(1)
-	vTaskDelete(&h2TestTask);
+	vTaskDelete(&h2MotionTask);
 }
-//---------------------------------------------------------------------------//
-/* End */
+
+//------------------------------------------------------------------//
+/* End void gps_task( void *pvParameters ) */
 
 /**
  * @brief      FreeRTOS
@@ -171,13 +187,8 @@ void test_task(void *pvParameters)
 //=============================================================================
 // [Local Function Definitions] ===============================================
 
-//=============================================================================
-
-//=============================================================================
-// [External Function Definition] =============================================
-
 /**
- * @brief
+ * @brief static void blink_led(void)
  *
  * @param  None
  *
@@ -191,37 +202,39 @@ void test_task(void *pvParameters)
 //=============================================================================
 
 //=============================================================================
-//================================[Main App]===================================
+// [External Function Definition] =============================================
 
 /**
- * @brief  Main fuction on app
+ * @details
+ *
+ * @param
+ *
+ * @return
+ */
+extern void motion_init(void)
+{
+	// Local data declaration
+	ESP_LOGW("[motion_init]", "Init motion logic...");
+
+	/**
+	 * FreeRTOS Task Creation
+	 */
+	xTaskCreate(&motion_task, "[motion_task]", configMINIMAL_STACK_SIZE * 4, NULL, tskIDLE_PRIORITY + 1, &h2MotionTask);
+}
+//---------------------------------------------------------------------------//
+/* End */
+
+/**
+ * @brief
  *
  * @param  None
  *
  * @return None
  *
  */
-void app_main(void)
-{
+//---------------------------------------------------------------------------//
+/* End */
 
-	// Init outputs
-	// output_init();
-
-	// Init inputs
-	// input_init();
-
-	// Init motion logic
-	motion_init();
-
-	// Init gps
-	gps_init();
-
-	/**
-     * FreeRTOS Task Creation
-     */
-    // xTaskCreate(&test_task, "[main_test_task]", configMINIMAL_STACK_SIZE * 4, NULL, tskIDLE_PRIORITY + 1, &h2TestTask);
-}
-
-//=============================[End app_main]==================================
+//=============================================================================
 
 //=============================[End Document]==================================

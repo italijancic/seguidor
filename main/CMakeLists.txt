@@ -4,5 +4,6 @@ idf_component_register(
 			"input.c"
 			"gps.c"
 			"nmea_parser.c"
+			"motion.c"
 
 	INCLUDE_DIRS ".")

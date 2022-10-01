@@ -275,6 +275,7 @@ extern void gps_init(void)
 	gps_event_group = xEventGroupCreate();
 	if(gps_event_group == 0 )
 		ESP_LOGE(TAG, "gps_event_group was not created!");
+
     /**
      * FreeRTOS Queues Creation
      */
@@ -285,7 +286,7 @@ extern void gps_init(void)
     /**
      * FreeRTOS Task Creation
      */
-    // xTaskCreate(&gps_task, "[gps_task]", 4096 ,NULL, configMINIMAL_STACK_SIZE + 1, &h2GpsTask);
+    // xTaskCreate(&gps_task, "[gps_task]", configMINIMAL_STACK_SIZE * 4, NULL, tskIDLE_PRIORITY + 1, &h2GpsTask);
 }
 //---------------------------------------------------------------------------//
 /* End */
